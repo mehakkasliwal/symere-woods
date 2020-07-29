@@ -1,0 +1,297 @@
+var virus;
+var vx;
+var vy = 6;
+var needle;
+var antibody;
+var virus_x;
+var virus_y;
+var antibody_x;
+var antibody_y;
+var ax = 0;
+var ay = -12;
+var V_DIAMETER = 40;
+var A_DIAMETER = 30;
+var num_hits = 0;
+var w_level;
+var level = 1;
+var points;
+var countClicks = 0;
+function start(){
+    homePage();
+    introStatement();
+    keyDownMethod(startGame);
+}
+
+//Background for the homePage.
+function homePage(){
+    //I got this image from https://www.wallpapermaiden.com/tag/anime+street, 
+    //then I cropped it and edited it. Then I re-uploaded it as a new image.
+    var background = new WebImage("https://i.ibb.co/N68qgDp/streets.jpg");
+    background.setSize(400, 600);
+    background.setPosition(0, 0);
+    add(background);
+}
+
+//Prints the text for the homepage.
+function introStatement(){
+    var paragraph = new Text("Greetings! Unfortunately at this time, we are under a crisis :( and", "11pt Times New Roman");
+    paragraph.setPosition(5, 135);
+    paragraph.setColor(Color.white);
+    add(paragraph);
+    
+    paragraph = new Text("we need your help to solve it. There has been an outbreak of a", "11pt Times New Roman");
+    paragraph.setPosition(5, 152);
+    paragraph.setColor(Color.white);
+    add(paragraph);
+    
+    paragraph = new Text("deadly virus called 'Corona Virus' also known as COVID-19. To", "11pt Times New Roman");
+    paragraph.setPosition(5, 169);
+    paragraph.setColor(Color.white);
+    add(paragraph);
+    
+    paragraph = new Text("save us, you must play the game, kill the 5 viruses to move on to ", "11pt Times New Roman");
+    paragraph.setPosition(5, 186);
+    paragraph.setColor(Color.white);
+    add(paragraph);
+    
+    paragraph = new Text("the next level and win all three levels. Please help save the world! ", "11pt Times New Roman");
+    paragraph.setPosition(5, 203);
+    paragraph.setColor(Color.white);
+    add(paragraph);
+    
+    paragraph = new Text("You can do it! Press the right arrow key to start the game, ", "11pt Times New Roman");
+    paragraph.setPosition(30, 220);
+    paragraph.setColor(Color.white);
+    add(paragraph);
+    
+    paragraph = new Text("good luck :)", "11pt Times New Roman");
+    paragraph.setPosition(165, 237);
+    paragraph.setColor(Color.white);
+    add(paragraph);
+}
+
+//If the right arrow key is pressed it will remove the homepage and make the game.
+function startGame(e){
+    if (e.keyCode == Keyboard.RIGHT) {
+        removeAll();
+        makeGame();
+    }
+}
+
+//This function makes the background for the game and prints the 
+//level number and number of points at the top of the page.
+function makeBackground(){
+    /*
+    I got this image from https://www.eurekalert.org/pub_releases
+    /2019-11/tuos-sdh111419.php
+    then I cropped it and edited it. Then I re-uploaded it as a new image.
+    */
+    var cells = new WebImage("https://i.ibb.co/TmktSg9/BG.jpg");
+    cells.setSize(400, 600);
+    cells.setPosition(0, 0);
+    add(cells);
+    drawNeedle();
+    points = new Text("Points ", "15pt Arial");
+    points.setPosition(330, 27);
+    points.setColor(Color.white);
+    add(points);
+    w_level = new Text("Level ", "15pt Arial");
+    w_level.setPosition(10, 27);
+    w_level.setColor(Color.white);
+    add(w_level);
+}
+
+//Draws the virus
+function drawVirus(){
+    /*
+    I got this image from https://qz.com/1834521/scientific-papers-on-novel
+    -coronavirus-doubling-every-14-days/
+    then I cropped it and edited it. Then I re-uploaded it as a new image.
+    */
+    virus = new WebImage("https://i.ibb.co/zHP3r16/Coronavirus.png");
+    virus.setSize(40, 40);
+    virus.setPosition(getWidth()/2, getHeight()/2);
+    add(virus);
+}
+
+//Makes the virus bounce off the walls and moves the virus.
+function moveVirus(){
+	checkWalls();
+	virus.move(vx, vy);
+}
+
+//Makes the virus bounce off the walls.
+function checkWalls(){
+	// Bounce off right wall
+	if(virus.getX() + virus.getWidth() > getWidth()){
+		vx = -vx;
+	}
+	
+	// Bounce off left wall
+	if(virus.getX() - virus.getWidth()/10 < 0){
+		vx = -vx;
+	}
+	
+	// Bounce off bottom wall
+	if(virus.getY() + virus.getHeight() > getHeight()){
+		vy = -vy;
+	}
+	
+	// Bounce off top wall
+	if(virus.getY() - virus.getHeight()/10 < 0){
+		vy = -vy;
+	}
+}
+
+//makes the setup for the game.
+function makeGame(){
+    makeBackground();
+    drawVirus();
+    drawAntibody();
+    playGame();
+    
+    points = new Text(num_hits, "15pt Arial");
+    points.setPosition(350, 47);
+    points.setColor(Color.white);
+    add(points);
+    w_level = new Text(level, "15pt Arial");
+    w_level.setPosition(30, 47);
+    w_level.setColor(Color.white);
+    add(w_level);
+}
+
+/*
+Sets the speed of the virus, sets the timer to move the virus and
+the antibody,  set the timer to detect the collisons, on every mouse 
+click it draw an antibody, prints points and level number.
+*/
+function playGame(){
+    //Sets the x-direction for the virus.
+    vx = Randomizer.nextInt(2, 7);
+    if(Randomizer.nextBoolean()){
+         vx = -vx;
+    }
+    //Set Timer to move the virus every 40 Milliseconds
+    setTimer(moveVirus, 40);
+    //Set timer to move antibody every 40 Ms
+    setTimer(moveAntibody, 40);
+    // Set timer to check collision every 50 Ms
+    setTimer(checkCollision, 50);
+    
+    mouseClickMethod(drawAntibody);
+}
+
+//Draws the needle
+function drawNeedle(){
+    /*
+    I got this image from https://loading.io/icon/cr6dvp
+    then I cropped it and edited it. Then I re-uploaded it as a new image.
+    */
+    needle = new WebImage("https://i.ibb.co/wyJyKDB/Main-injection.png");
+    needle.setSize(20,60);
+    needle.setPosition(10, 420);
+    add(needle);
+    mouseMoveMethod(moveNeedle);
+}
+
+//This function sets the needle to move from the bottom left to the
+//bottom right and vice versa.
+function moveNeedle(event){
+    var x = event.getX() - needle.getWidth()/2;
+    if(x < 0)
+        x = 0;
+    if(x + needle.getWidth() > getWidth())
+        x = getWidth() - needle.getWidth();
+        needle.setPosition(x, needle.getY());
+}
+
+//Draws the antibody
+function drawAntibody(){
+    /*
+    I got this image from https://www.precisionvaccinations.com/vaccines-
+    induce-anti-ha-stalk-antibodies-could-play-role-future-vaccine-development
+    then I cropped it and edited it. Then I re-uploaded it as a new image.
+    */
+    var x = needle.getX() - 5;
+    var y = needle.getY() - 35;
+    countClicks = countClicks + 1;
+    antibody = new WebImage("https://i.ibb.co/ZmtSW9T/virus-1280.png");
+    antibody.setSize(30, 30);
+    antibody.setPosition(x,y);
+    add(antibody);
+}
+
+//Moves the antibody.
+function moveAntibody(){
+    antibody.move(ax,ay);
+}
+
+/*
+This function helps detect collisions between the virus and the antibody.
+It also increases the level number and speed, and helps determine if the 
+user won or lost.
+*/
+function checkCollision(antibody_x, antibody_y, virus_x, virus_y){
+    antibody_x = antibody.getX();
+    antibody_y = antibody.getY();
+    virus_x = virus.getX();
+    virus_y = virus.getY();
+
+    var x = virus_x - antibody_x;
+    var y = virus_y - antibody_y;
+    var d = A_DIAMETER + V_DIAMETER;
+    if ((y * y + x * x <= d * d) == true){
+        if (num_hits == 5){
+            level = level + 1;
+            vy = vy + 8;
+            num_hits = 0;
+        }else{
+            num_hits = num_hits + 1;    
+        }
+        cleanUp();
+        if(countClicks >= 25){
+            youLose();
+        }else if(level == 3 && num_hits == 5){
+             youWin();
+        }else{
+            makeGame();
+        }
+    }
+}
+//removes everything, and stop all the timers.
+function cleanUp(){
+    removeAll();
+    stopTimer(moveVirus);
+    stopTimer(moveAntibody);
+    stopTimer(checkCollision, 50);
+}
+
+//If the user win it adds a yellow background and a text.
+function youWin(){
+    var background = new Rectangle(400, 600)
+    background.setPosition(0, 0);
+    background.setColor(Color.yellow)
+    add(background);
+    var win_text = new Text("YAYY, congratulations, you did it, ", "13pt Arial");
+    win_text.setPosition(70, 227);
+    add(win_text);
+    var win_text = new Text("you saved the world!! Thank you :)", "13pt Arial");
+    win_text.setPosition(63, 252);
+    add(win_text);
+}
+
+//If the user loses it adds a black background and a text.
+function youLose(){
+    var background = new Rectangle(420, 600);
+    background.setPosition(0, 0);
+    background.setColor(Color.black);
+    add(background);
+    var lose_text = new Text("Oh no, you lost. You used more than 45 antibodies.", "13.1pt Arial");
+    lose_text.setPosition(5, 230);
+    lose_text.setColor(Color.white);
+    add(lose_text);
+    lose_text = new Text("Try Again!", "13.1pt Arial");
+    lose_text.setPosition(160, 250);
+    lose_text.setColor(Color.white);
+    add(lose_text);
+}
